@@ -77,38 +77,41 @@
             color: #FFD700;
             margin-bottom: 15px;
             font-size: 1.5rem;
-            transition: color 0.3s ease;
         }
 
         .tool-card p {
             margin-bottom: 20px;
             flex-grow: 1;
-            transition: color 0.3s ease;
         }
 
-        .tool-btn {
+        /* Button Styles */
+        .btn {
+            display: inline-block;
             background-color: #FFD700;
             color: #1E1E2F;
-            border: none;
             padding: 10px 20px;
+            border: none;
             border-radius: 5px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            align-self: flex-start;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+            width: 100%;
         }
 
-        .tool-btn:hover {
+        .btn:hover {
             background-color: #E6C200;
-            transform: scale(1.05);
+            transform: translateY(-2px);
         }
 
-        /* Footer */
+        /* Footer Styles */
         footer {
             text-align: center;
-            padding: 20px 0;
+            padding: 20px;
             background-color: #2B2D42;
-            margin-top: 40px;
+            margin-top: 30px;
         }
 
         /* Responsive Design */
@@ -119,6 +122,10 @@
 
             header h1 {
                 font-size: 2rem;
+            }
+
+            .tool-card {
+                padding: 20px;
             }
         }
     </style>
@@ -132,60 +139,60 @@
 
     <main class="container">
         <div class="tools-grid">
-            <!-- Image Converter -->
+            <!-- Tool Card 1: Image Converter -->
             <div class="tool-card">
                 <h2>Image Converter</h2>
                 <p>Convert your images between different formats like JPG, PNG, WEBP, and more with just a few clicks.</p>
-                <button class="image-converter.html" onclick="redirectToTool('Image Converter')">Use Tool</button>
+                <button class="btn" onclick="redirectToTool('Image Converter')">Use Tool</button>
             </div>
 
-            <!-- Image Compressor -->
+            <!-- Tool Card 2: Image Compressor -->
             <div class="tool-card">
                 <h2>Image Compressor</h2>
                 <p>Reduce the file size of your images without significant quality loss. Perfect for web optimization.</p>
-                <button class="tool-btn" onclick="redirectToTool('Image Compressor')">Use Tool</button>
+                <button class="btn" onclick="redirectToTool('Image Compressor')">Use Tool</button>
             </div>
 
-            <!-- Image Crop -->
+            <!-- Tool Card 3: Image Crop -->
             <div class="tool-card">
                 <h2>Image Crop</h2>
-                <p>Crop your images to the perfect size and aspect ratio. Customize dimensions or use presets.</p>
-                <button class="tool-btn" onclick="redirectToTool('Image Crop')">Use Tool</button>
+                <p>Crop your images to the perfect size and aspect ratio. Supports custom dimensions and presets.</p>
+                <button class="btn" onclick="redirectToTool('Image Crop')">Use Tool</button>
             </div>
 
-            <!-- Video Converter -->
+            <!-- Tool Card 4: Video Converter -->
             <div class="tool-card">
                 <h2>Video Converter</h2>
-                <p>Convert videos between different formats like MP4, AVI, MOV, and more with high quality output.</p>
-                <button class="tool-btn" onclick="redirectToTool('Video Converter')">Use Tool</button>
+                <p>Convert videos between popular formats like MP4, AVI, MOV, and more. Adjust quality settings as needed.</p>
+                <button class="btn" onclick="redirectToTool('Video Converter')">Use Tool</button>
             </div>
 
-            <!-- Age Calculator -->
+            <!-- Tool Card 5: Age Calculator -->
             <div class="tool-card">
                 <h2>Age Calculator</h2>
-                <p>Calculate your exact age in years, months, and days based on your birth date.</p>
-                <button class="tool-btn" onclick="redirectToTool('Age Calculator')">Use Tool</button>
+                <p>Calculate your exact age in years, months, and days. Perfect for tracking milestones and anniversaries.</p>
+                <button class="btn" onclick="redirectToTool('Age Calculator')">Use Tool</button>
             </div>
 
-            <!-- EMI Calculator -->
+            <!-- Tool Card 6: EMI Calculator -->
             <div class="tool-card">
                 <h2>EMI Calculator</h2>
-                <p>Calculate your Equated Monthly Installments for loans with detailed breakdown of principal and interest.</p>
-                <button class="tool-btn" onclick="redirectToTool('EMI Calculator')">Use Tool</button>
+                <p>Calculate your Equated Monthly Installments for loans with different interest rates and tenures.</p>
+                <button class="btn" onclick="redirectToTool('EMI Calculator')">Use Tool</button>
             </div>
 
-            <!-- SIP Calculator -->
+            <!-- Tool Card 7: SIP Calculator -->
             <div class="tool-card">
                 <h2>SIP Calculator</h2>
-                <p>Plan your Systematic Investment Plan returns with this powerful calculator for your financial goals.</p>
-                <button class="tool-btn" onclick="redirectToTool('SIP Calculator')">Use Tool</button>
+                <p>Plan your Systematic Investment Plan returns with this easy-to-use calculator for your financial goals.</p>
+                <button class="btn" onclick="redirectToTool('SIP Calculator')">Use Tool</button>
             </div>
 
-            <!-- Audio Trim -->
+            <!-- Tool Card 8: Audio Trim -->
             <div class="tool-card">
                 <h2>Audio Trim</h2>
-                <p>Trim your audio files to the perfect length. Cut, fade, and adjust volume with ease.</p>
-                <button class="tool-btn" onclick="redirectToTool('Audio Trim')">Use Tool</button>
+                <p>Trim your audio files to the perfect length. Cut, fade, and adjust volume for your perfect sound clip.</p>
+                <button class="btn" onclick="redirectToTool('Audio Trim')">Use Tool</button>
             </div>
         </div>
     </main>
@@ -197,33 +204,12 @@
     </footer>
 
     <script>
-        // JavaScript for tool redirection (placeholder)
+        // JavaScript for button click functionality
         function redirectToTool(toolName) {
             alert(`Redirecting to ${toolName}`);
             // In a real implementation, this would navigate to the tool page
-            // window.location.href = `/tools/${toolName.toLowerCase().replace(' ', '-')}`;
+            // window.location.href = toolName.toLowerCase().replace(' ', '-') + '.html';
         }
-
-        // Optional: Add animation on scroll
-        document.addEventListener('DOMContentLoaded', () => {
-            const toolCards = document.querySelectorAll('.tool-card');
-            
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = 1;
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            toolCards.forEach((card, index) => {
-                card.style.opacity = 0;
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = `all 0.5s ease ${index * 0.1}s`;
-                observer.observe(card);
-            });
-        });
     </script>
 </body>
 </html>
