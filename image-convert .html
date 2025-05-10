@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter | Multi Tool Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #1E1E2F;
+            color: #EAEAEA;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #3A3D5B;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.2);
+        }
+        h1 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .upload-area {
+            border: 2px dashed #FFD700;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            background-color: rgba(255, 215, 0, 0.05);
+        }
+        .upload-area:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+        }
+        .upload-area.highlight {
+            background-color: rgba(255, 215, 0, 0.15);
+            border-color: #E6C200;
+        }
+        .preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .preview-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        .image-preview {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 5px;
+            display: none;
+            margin-top: 10px;
+        }
+        .file-info {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #AAA;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            background-color: #2B2D42;
+            border: 1px solid #FFD700;
+            color: #EAEAEA;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        button {
+            background-color: #FFD700;
+            color: #1E1E2F;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background-color: #E6C200;
+        }
+        button:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            margin-top: 10px;
+            display: none;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 600px) {
+            .preview-container {
+                flex-direction: column;
+            }
+            .upload-area {
+                padding: 30px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Image Converter</h1>
+        
+        <div class="upload-area" id="uploadArea">
+            <h3>Drag & Drop Your Image Here</h3>
+            <p>or click to browse files</p>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="controls">
+            <select id="formatSelect">
+                <option value="jpeg">JPEG</option>
+                <option value="png">PNG</option>
+                <option value="webp">WEBP</option>
+                <option value="bmp">BMP</option>
+            </select>
+            <button id="convertBtn" disabled>Convert Image</button>
+        </div>
+        
+        <div class="preview-container">
+            <div class="preview-box">
+                <h3>Original Image</h3>
+                <img id="originalPreview" class="image-preview">
+                <div id="originalInfo" class="file-info"></div>
+            </div>
+            <div class="preview-box">
+                <h3>Converted Image</h3>
+                <img id="convertedPreview" class="image-preview">
+                <div id="convertedInfo" class="file-info"></div>
+                <button id="downloadBtn" class="download-btn">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const convertBtn = document.getElementById('convertBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const formatSelect = document.getElementById('formatSelect');
+        const originalPreview = document.getElementById('originalPreview');
+        const convertedPreview = document.getElementById('convertedPreview');
+        const originalInfo = document.getElementById('originalInfo');
+        const convertedInfo = document.getElementById('convertedInfo');
+
+        // State variables
+        let originalImageUrl = null;
+        let convertedImageUrl = null;
+
+        // 1. Fix: Proper drag and drop implementation
+        // Prevent default drag behaviors
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        // Highlight drop area when item is dragged over it
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight() {
+            uploadArea.classList.add('highlight');
+        }
+
+        function unhighlight() {
+            uploadArea.classList.remove('highlight');
+        }
+
+        // Handle dropped files
+        uploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+
+        // 2. Fix: Handle file selection (both click and drop)
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', function() {
+            if (this.files.length) {
+                handleFiles(this.files);
+            }
+        });
+
+        function handleFiles(files) {
+            const file = files[0];
+            
+            // Check if file is an image
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file (JPEG, PNG, etc.)');
+                return;
+            }
+            
+            // Clear previous image URLs to free memory
+            if (originalImageUrl) {
+                URL.revokeObjectURL(originalImageUrl);
+            }
+            if (convertedImageUrl) {
+                URL.revokeObjectURL(convertedImageUrl);
+            }
+            
+            // Create object URL for the selected file
+            originalImageUrl = URL.createObjectURL(file);
+            
+            // Display original image
+            originalPreview.src = originalImageUrl;
+            originalPreview.style.display = 'block';
+            
+            // Display file info
+            originalInfo.innerHTML = `
+                Name: <strong>${file.name}</strong><br>
+                Type: <strong>${file.type}</strong><br>
+                Size: <strong>${(file.size / 1024).toFixed(2)} KB</strong>
+            `;
+            
+            // Hide converted image and download button
+            convertedPreview.style.display = 'none';
+            downloadBtn.style.display = 'none';
+            convertedInfo.textContent = '';
+            
+            // Enable convert button
+            convertBtn.disabled = false;
+        }
+
+        // 3. Fix: Image conversion with proper error handling
+        convertBtn.addEventListener('click', convertImage);
+
+        function convertImage() {
+            if (!originalImageUrl) {
+                alert('Please select an image first');
+                return;
+            }
+            
+            const format = formatSelect.value;
+            const img = new Image();
+            
+            img.onload = function() {
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                const ctx = canvas.getContext('2d');
+                
+                // For JPEG, fill with white background first
+                if (format === 'jpeg') {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                }
+                
+                // Draw image
+                ctx.drawImage(img, 0, 0);
+                
+                // Convert to selected format
+                let mimeType;
+                switch(format) {
+                    case 'jpeg': mimeType = 'image/jpeg'; break;
+                    case 'png': mimeType = 'image/png'; break;
+                    case 'webp': mimeType = 'image/webp'; break;
+                    case 'bmp': mimeType = 'image/bmp'; break;
+                    default: mimeType = 'image/jpeg';
+                }
+                
+                // Quality setting (for JPEG and WEBP)
+                const quality = format === 'webp' ? 0.8 : 0.92;
+                
+                // Convert to blob
+                canvas.toBlob(function(blob) {
+                    if (!blob) {
+                        alert('Conversion failed. Please try another image.');
+                        return;
+                    }
+                    
+                    // Create object URL for converted image
+                    if (convertedImageUrl) {
+                        URL.revokeObjectURL(convertedImageUrl);
+                    }
+                    convertedImageUrl = URL.createObjectURL(blob);
+                    
+                    // Display converted image
+                    convertedPreview.src = convertedImageUrl;
+                    convertedPreview.style.display = 'block';
+                    
+                    // Display converted info
+                    convertedInfo.innerHTML = `
+                        Format: <strong>${format.toUpperCase()}</strong><br>
+                        Size: <strong>${(blob.size / 1024).toFixed(2)} KB</strong>
+                    `;
+                    
+                    // Show download button
+                    downloadBtn.style.display = 'block';
+                    
+                }, mimeType, quality);
+            };
+            
+            img.onerror = function() {
+                alert('Error loading image. Please try another file.');
+            };
+            
+            img.src = originalImageUrl;
+        }
+
+        // 4. Fix: Download functionality
+        downloadBtn.addEventListener('click', function() {
+            if (!convertedImageUrl) return;
+            
+            const a = document.createElement('a');
+            a.href = convertedImageUrl;
+            a.download = `converted-image.${formatSelect.value}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    </script>
+</body>
+</html>
